@@ -1,0 +1,130 @@
+//index
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/index.css">
+    <title>Document</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Bild</th>
+            <th>Namn</th>
+            <th>Banknummer</th>
+            <th>Saldo</th>
+        </tr>
+
+        <?php
+        // Connection till mysqli server
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+
+        $conn = new mysqli($servername, $username, $password);
+    
+
+        $select_base = mysqli_select_db($conn, 'user_bank');
+
+        if(!$select_base ) {
+            die("Could not select database: " . mysqli_error($conn));
+        }
+
+        $sql = "SELECT Bild, Namn, Bankkonto, Saldo FROM user_info";
+        $result = mysqli_query($conn, $sql);
+
+        if (mysqli_num_rows($result) > 0) {
+            while($row = mysqli_fetch_assoc($result)) {
+                echo "<tr>";
+                echo "<td><img src='" . $row["Bild"] . "' alt='Bild' style='width:100px;height:100px;'></td>";
+                echo "<td>" . $row["Namn"] . "</td>";
+                echo "<td>" . $row["Bankkonto"] . "</td>";
+                echo "<td>" . $row["Saldo"] . "</td>";
+                echo "</tr>";
+            }
+        }
+        ?>
+
+    </table>
+</body>
+</html>
+
+
+//userdata
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <title>Bank info</title>
+</head>
+<body>    
+
+  <h1>Bank Info</h1>
+    <form action="#" method="post" enctype="multipart/form-data">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="account_number">Bank Number:</label><br>
+        <input type="text" id="account_number" name="account_number" required><br><br>
+        <label for="balance">Balance:</label><br>
+        <input type="number" id="balance" name="balance" required><br><br>
+        <label for="picture">Picture: </label> <br>
+        <input type="file" name="picture"> <br>
+        <input type="submit" name="submit" value="Spara">
+    </form>
+
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "user_bank";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if (!mysqli_select_db($conn, 'user_bank')) {
+    die("Could not select database: " . mysqli_error($conn));
+}
+
+if (isset($_POST["submit"])) {
+    $name = $_POST["name"];
+    $account_number = $_POST["account_number"];
+    $balance = $_POST["balance"];
+    $target_dir = "./bilder/";
+    $target_file = $target_dir . basename($_FILES["picture"]["name"]);
+    $uploadOk = 1;
+
+    if (empty($name)) {
+        echo "Name cannot be empty! <br>";
+    }
+
+    if (empty($account_number)) {
+        echo "Bank Account Number cannot be empty! <br>";
+    } elseif (strlen($account_number) < 4 || strlen($account_number) > 34) {
+        echo "Bank Account Number must be between 4 and 34 numbers! <br>";
+    }
+
+    if (empty($balance)) {
+        echo "Balance cannot be empty!";
+    }
+
+    if ($uploadOk == 0) {
+            echo "Error";
+        } else {
+            if (move_uploaded_file($_FILES["picture"]["tmp_name"], $target_file)) {
+                echo "The file '". basename($_FILES['picture']['name']). "' has been uploaded in the 'bilder' folder <br>";
+            } else {
+                echo "There was an error uploading your file! <br>";
+            }
+        }
+    }
+
+mysqli_close($conn);
+?>
+</body>
+</html>
